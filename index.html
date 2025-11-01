@@ -112,7 +112,7 @@
                                     <li>• Messages never stored</li>
                                     <li>• Works on IPFS</li>
                                 </ul>
-                                <p class="mt-2 text-xs text-gray-500">Note: Improved cross-network connectivity with multiple relay servers</p>
+                                <p class="mt-2 text-xs text-gray-500">Note: Works best on open networks. Some corporate/restricted networks may block P2P connections.</p>
                             </div>
                         </div>
                     </div>
@@ -242,20 +242,6 @@
         const adjectives = ['Swift', 'Brave', 'Quiet', 'Clever', 'Bold', 'Wise', 'Silent', 'Noble', 'Cosmic', 'Mystic', 'Stellar', 'Lunar', 'Solar', 'Arctic', 'Crimson', 'Azure', 'Emerald', 'Golden', 'Silver', 'Crystal'];
         const nouns = ['Fox', 'Wolf', 'Eagle', 'Tiger', 'Dragon', 'Phoenix', 'Falcon', 'Hawk', 'Lion', 'Panther', 'Raven', 'Serpent', 'Bear', 'Owl', 'Lynx', 'Cobra', 'Viper', 'Shark', 'Dolphin', 'Whale'];
 
-        // Enhanced RTC configuration for cross-network connectivity
-        const rtcConfig = {
-            iceServers: [
-                {urls: "stun:stun.l.google.com:19302"},
-                {urls: "stun:stun1.l.google.com:19302"},
-                {urls: "stun:stun2.l.google.com:19302"},
-                {urls: "stun:stun3.l.google.com:19302"},
-                {urls: "stun:stun4.l.google.com:19302"},
-                {urls: "stun:stun.stunprotocol.org:3478"},
-                {urls: "stun:stun.leaseweb.net:3478"},
-                {urls: "stun:stun.nextcloud.com:443"}
-            ]
-        };
-
         function generateUsername() {
             const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
             const noun = nouns[Math.floor(Math.random() * nouns.length)];
@@ -312,12 +298,7 @@
             await generateKeyPair();
             hideLoading();
 
-            // Use enhanced RTC configuration
-            const config = {
-                appId: 'xsukax-secure-chat-v1',
-                rtcConfig: rtcConfig
-            };
-            
+            const config = {appId: 'xsukax-secure-chat-v1'};
             room = joinRoom(config, sessionId);
 
             setupActions();
@@ -356,12 +337,7 @@
             showLoading('Connecting and generating keys...');
             await generateKeyPair();
 
-            // Use enhanced RTC configuration
-            const config = {
-                appId: 'xsukax-secure-chat-v1',
-                rtcConfig: rtcConfig
-            };
-            
+            const config = {appId: 'xsukax-secure-chat-v1'};
             room = joinRoom(config, sessionId);
 
             setupActions();
@@ -423,17 +399,11 @@
                 setTimeout(() => location.reload(), 3000);
             });
 
-            // Improved connection status reporting
-            room.onPeerError((error) => {
-                console.error('Peer connection error:', error);
-                displaySystemMessage('❌ Connection issue detected. Trying to reconnect...');
-            });
-
             // Connection timeout - if no peer after 30 seconds
             setTimeout(() => {
                 if (!peerPublicKey && document.getElementById('connectionDisplay').classList.contains('hidden') === false) {
                     displaySystemMessage('⏱️ Still waiting for peer to connect...');
-                    displaySystemMessage('💡 Tip: Make sure both parties are not behind strict firewalls');
+                    displaySystemMessage('💡 Tip: Make sure your peer has entered the connection code');
                 }
             }, 30000);
         }
