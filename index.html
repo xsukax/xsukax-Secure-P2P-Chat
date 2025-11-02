@@ -56,7 +56,7 @@
                             <svg class="w-8 sm:w-10 h-8 sm:h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
                         </div>
                         <h2 class="text-xl sm:text-2xl font-bold text-white mb-2">Private LAN Chat & File Sharing</h2>
-                        <p class="text-sm sm:text-base text-gray-400">Local network • End-to-end encrypted • Up to 1GB files</p>
+                        <p class="text-sm sm:text-base text-gray-400">Pure WebRTC • No servers • Up to 1GB files</p>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
@@ -65,7 +65,7 @@
                                 <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                             </div>
                             <h3 class="text-white font-semibold mb-2 text-sm sm:text-base">Start New Chat</h3>
-                            <p class="text-xs sm:text-sm text-gray-400">Create and share connection code</p>
+                            <p class="text-xs sm:text-sm text-gray-400">Create connection offer</p>
                         </button>
 
                         <button onclick="showJoinForm()" class="p-4 sm:p-6 bg-gray-700 hover:bg-gray-600 border border-gray-600 rounded-lg transition group">
@@ -73,14 +73,14 @@
                                 <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
                             </div>
                             <h3 class="text-white font-semibold mb-2 text-sm sm:text-base">Join Chat</h3>
-                            <p class="text-xs sm:text-sm text-gray-400">Enter connection code</p>
+                            <p class="text-xs sm:text-sm text-gray-400">Paste connection offer</p>
                         </button>
                     </div>
 
                     <div id="joinForm" class="hidden space-y-4 animate-slideUp">
                         <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Connection Code</label>
-                            <input type="text" id="connectionCode" placeholder="Paste the connection code here" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm sm:text-base">
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Connection Offer</label>
+                            <textarea id="connectionCode" placeholder="Paste the connection offer here" rows="4" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-xs font-mono resize-none"></textarea>
                         </div>
                         <div class="flex gap-3">
                             <button onclick="joinSession()" class="flex-1 px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition text-sm sm:text-base">Connect</button>
@@ -88,20 +88,43 @@
                         </div>
                     </div>
 
-                    <div id="connectionDisplay" class="hidden animate-slideUp">
+                    <div id="offerDisplay" class="hidden animate-slideUp">
                         <div class="bg-gray-700 border border-gray-600 rounded-lg p-4 sm:p-6">
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-white font-semibold text-sm sm:text-base">Your Connection Code</h3>
+                                <h3 class="text-white font-semibold text-sm sm:text-base">Your Connection Offer</h3>
                                 <div class="flex items-center gap-2">
                                     <span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
                                     <span class="text-xs text-gray-400 hidden sm:inline">Waiting...</span>
                                 </div>
                             </div>
-                            <div class="bg-gray-800 border border-gray-600 rounded-lg p-3 sm:p-4 mb-4">
-                                <code id="codeDisplay" class="text-green-400 text-xs sm:text-sm break-all select-all block"></code>
+                            <div class="bg-gray-800 border border-gray-600 rounded-lg p-3 sm:p-4 mb-4 max-h-32 overflow-y-auto">
+                                <code id="offerCode" class="text-green-400 text-xs break-all select-all block font-mono"></code>
                             </div>
-                            <button onclick="copyCode()" class="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition text-sm sm:text-base">📋 Copy to Clipboard</button>
-                            <p class="text-xs text-gray-400 mt-4 text-center">Share with peer on the same LAN</p>
+                            <button onclick="copyOffer()" class="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition text-sm sm:text-base mb-3">📋 Copy Offer</button>
+                            <p class="text-xs text-gray-400 text-center mb-4">Share this with your peer, then wait for their answer</p>
+                            
+                            <div id="answerSection" class="hidden">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Paste Peer's Answer</label>
+                                <textarea id="answerInput" placeholder="Paste answer here" rows="4" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-xs font-mono resize-none mb-3"></textarea>
+                                <button onclick="submitAnswer()" class="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition text-sm sm:text-base">Submit Answer</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="answerDisplay" class="hidden animate-slideUp">
+                        <div class="bg-gray-700 border border-gray-600 rounded-lg p-4 sm:p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-white font-semibold text-sm sm:text-base">Your Answer</h3>
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                                    <span class="text-xs text-gray-400 hidden sm:inline">Connecting...</span>
+                                </div>
+                            </div>
+                            <div class="bg-gray-800 border border-gray-600 rounded-lg p-3 sm:p-4 mb-4 max-h-32 overflow-y-auto">
+                                <code id="answerCode" class="text-green-400 text-xs break-all select-all block font-mono"></code>
+                            </div>
+                            <button onclick="copyAnswer()" class="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition text-sm sm:text-base">📋 Copy Answer</button>
+                            <p class="text-xs text-gray-400 mt-4 text-center">Send this back to the host to complete connection</p>
                         </div>
                     </div>
 
@@ -109,14 +132,14 @@
                         <div class="flex gap-3">
                             <svg class="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                             <div class="text-xs sm:text-sm text-gray-300">
-                                <strong class="text-white">Privacy First:</strong>
+                                <strong class="text-white">Pure WebRTC - No Servers:</strong>
                                 <ul class="mt-2 space-y-1 text-gray-400">
+                                    <li>• Native browser P2P (no dependencies)</li>
                                     <li>• ECDH + AES-256-GCM encryption</li>
-                                    <li>• Direct P2P on local network</li>
                                     <li>• Encrypted file transfers (up to 1GB)</li>
-                                    <li>• Session persists on refresh</li>
+                                    <li>• Works entirely on LAN</li>
                                 </ul>
-                                <p class="mt-2 text-xs text-gray-500">Note: Both devices must be on the same local network.</p>
+                                <p class="mt-2 text-xs text-gray-500">Note: Manual offer/answer exchange for maximum privacy.</p>
                             </div>
                         </div>
                     </div>
@@ -161,7 +184,7 @@
                     </div>
                 </div>
 
-                <!-- Messages - This is the scrollable area -->
+                <!-- Messages -->
                 <div id="chatArea" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-900"></div>
 
                 <!-- Typing Indicator -->
@@ -255,24 +278,22 @@
     </div>
 
     <script type="module">
-        import {joinRoom} from 'https://cdn.jsdelivr.net/npm/trystero@0.22.0/+esm'
-
-        let room, sendEncrypted, getEncrypted, sendTyping, getTyping, sendUserInfo, getUserInfo, sendKey, getKey;
-        let sendFileChunk, getFileChunk, sendFileInit, getFileInit;
-        let sendMessageAction, getMessageAction;
+        let peerConnection;
+        let dataChannel;
         let myKeyPair, peerPublicKey, sharedSecret;
-        let sessionId, myUsername, peerUsername;
+        let myUsername, peerUsername;
         let typingTimeout;
         let isConnected = false;
-        let fileTransfers = {};
         let messages = new Map();
         let currentEditingMessageId = null;
+        let fileTransfers = {};
+        let isHost = false;
 
         const CHUNK_SIZE = 256 * 1024;
         const MAX_FILE_SIZE = 1024 * 1024 * 1024;
 
-        const adjectives = ['Swift', 'Brave', 'Quiet', 'Clever', 'Bold', 'Wise', 'Silent', 'Noble', 'Cosmic', 'Mystic', 'Stellar', 'Lunar', 'Solar', 'Arctic', 'Crimson', 'Azure', 'Emerald', 'Golden', 'Silver', 'Crystal'];
-        const nouns = ['Fox', 'Wolf', 'Eagle', 'Tiger', 'Dragon', 'Phoenix', 'Falcon', 'Hawk', 'Lion', 'Panther', 'Raven', 'Serpent', 'Bear', 'Owl', 'Lynx', 'Cobra', 'Viper', 'Shark', 'Dolphin', 'Whale'];
+        const adjectives = ['Swift', 'Brave', 'Quiet', 'Clever', 'Bold', 'Wise', 'Silent', 'Noble', 'Cosmic', 'Mystic'];
+        const nouns = ['Fox', 'Wolf', 'Eagle', 'Tiger', 'Dragon', 'Phoenix', 'Falcon', 'Hawk', 'Lion', 'Panther'];
 
         function generateUsername() {
             const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
@@ -281,69 +302,8 @@
             return `${adj}${noun}${num}`;
         }
 
-        function generateSessionId() {
-            const array = new Uint8Array(16);
-            crypto.getRandomValues(array);
-            return Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
-        }
-
         function generateMessageId() {
             return Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        }
-
-        // Session persistence
-        function saveSession() {
-            const sessionData = {
-                sessionId,
-                myUsername,
-                timestamp: Date.now()
-            };
-            localStorage.setItem('xsukax_session', JSON.stringify(sessionData));
-        }
-
-        function loadSession() {
-            const saved = localStorage.getItem('xsukax_session');
-            if (!saved) return null;
-            
-            const data = JSON.parse(saved);
-            const hoursSinceLastUse = (Date.now() - data.timestamp) / (1000 * 60 * 60);
-            
-            if (hoursSinceLastUse > 24) {
-                localStorage.removeItem('xsukax_session');
-                return null;
-            }
-            
-            return data;
-        }
-
-        function clearSession() {
-            localStorage.removeItem('xsukax_session');
-        }
-
-        // Check for existing session on load
-        window.addEventListener('DOMContentLoaded', async () => {
-            const saved = loadSession();
-            if (saved) {
-                sessionId = saved.sessionId;
-                myUsername = saved.myUsername;
-                await reconnectSession();
-            }
-        });
-
-        async function reconnectSession() {
-            showLoading('Reconnecting to session...');
-            await generateKeyPair();
-
-            const config = {appId: 'xsukax-lan-chat-v1'};
-            room = joinRoom(config, sessionId);
-
-            setupActions();
-            setupEventHandlers();
-
-            document.getElementById('myUsername').textContent = myUsername;
-            document.getElementById('myInitial').textContent = myUsername.charAt(0);
-            
-            displaySystemMessage('🔄 Reconnected to session');
         }
 
         function showNotification(title, message) {
@@ -398,26 +358,168 @@
         };
 
         window.createSession = async function() {
-            sessionId = generateSessionId();
+            isHost = true;
             myUsername = generateUsername();
-            showLoading('Generating encryption keys...');
+            showLoading('Creating connection offer...');
+
             await generateKeyPair();
-            hideLoading();
+            await setupPeerConnection(true);
 
-            const config = {appId: 'xsukax-lan-chat-v1'};
-            room = joinRoom(config, sessionId);
-
-            setupActions();
-            setupEventHandlers();
-
-            const connectionCode = btoa(sessionId);
-            document.getElementById('codeDisplay').textContent = connectionCode;
-            document.getElementById('connectionDisplay').classList.remove('hidden');
             document.getElementById('myUsername').textContent = myUsername;
             document.getElementById('myInitial').textContent = myUsername.charAt(0);
-
-            saveSession();
         };
+
+        async function setupPeerConnection(createOffer) {
+            const config = {
+                iceServers: [{urls: 'stun:stun.l.google.com:19302'}]
+            };
+
+            peerConnection = new RTCPeerConnection(config);
+
+            if (createOffer) {
+                dataChannel = peerConnection.createDataChannel('xsukax-chat');
+                setupDataChannel(dataChannel);
+            } else {
+                peerConnection.ondatachannel = (event) => {
+                    dataChannel = event.channel;
+                    setupDataChannel(dataChannel);
+                };
+            }
+
+            const iceCandidates = [];
+
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    iceCandidates.push(event.candidate);
+                } else {
+                    const offerData = {
+                        sdp: peerConnection.localDescription,
+                        candidates: iceCandidates,
+                        username: myUsername,
+                        publicKey: null
+                    };
+
+                    crypto.subtle.exportKey('raw', myKeyPair.publicKey).then(exported => {
+                        offerData.publicKey = Array.from(new Uint8Array(exported));
+                        const encoded = btoa(JSON.stringify(offerData));
+                        
+                        if (createOffer) {
+                            document.getElementById('offerCode').textContent = encoded;
+                            document.getElementById('offerDisplay').classList.remove('hidden');
+                            document.getElementById('answerSection').classList.remove('hidden');
+                        } else {
+                            document.getElementById('answerCode').textContent = encoded;
+                            document.getElementById('answerDisplay').classList.remove('hidden');
+                        }
+                        hideLoading();
+                    });
+                }
+            };
+
+            peerConnection.onconnectionstatechange = () => {
+                if (peerConnection.connectionState === 'connected') {
+                    displaySystemMessage('🔗 P2P Connection established');
+                } else if (peerConnection.connectionState === 'disconnected') {
+                    displaySystemMessage('⚠️ Connection lost');
+                } else if (peerConnection.connectionState === 'failed') {
+                    showNotification('Connection Failed', 'Unable to establish P2P connection. Try again.');
+                }
+            };
+
+            if (createOffer) {
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+            }
+        }
+
+        function setupDataChannel(channel) {
+            channel.onopen = async () => {
+                if (peerPublicKey) {
+                    await deriveSharedSecret();
+                }
+            };
+
+            channel.onmessage = async (event) => {
+                const data = JSON.parse(event.data);
+
+                if (data.type === 'publicKey') {
+                    peerPublicKey = await importPublicKey(data.key);
+                    await deriveSharedSecret();
+                    
+                } else if (data.type === 'username') {
+                    peerUsername = data.username;
+                    document.getElementById('peerUsername').textContent = peerUsername;
+                    document.getElementById('peerInitial').textContent = peerUsername.charAt(0);
+                    document.getElementById('typingUsername').textContent = peerUsername;
+                    
+                } else if (data.type === 'message') {
+                    const decrypted = await decryptMessage(data.encrypted, data.iv);
+                    const messageData = JSON.parse(decrypted);
+                    
+                    messages.set(messageData.id, {
+                        id: messageData.id,
+                        text: messageData.text,
+                        username: peerUsername || 'Peer',
+                        timestamp: messageData.timestamp,
+                        isOwn: false,
+                        isEdited: false,
+                        isDeleted: false
+                    });
+                    
+                    renderMessage(messageData.id);
+                    
+                } else if (data.type === 'action') {
+                    const decrypted = await decryptMessage(data.encrypted, data.iv);
+                    const action = JSON.parse(decrypted);
+                    
+                    if (action.action === 'edit') {
+                        const msg = messages.get(action.messageId);
+                        if (msg) {
+                            msg.text = action.newText;
+                            msg.isEdited = true;
+                            updateMessageInDOM(action.messageId);
+                        }
+                    } else if (action.action === 'delete') {
+                        const msg = messages.get(action.messageId);
+                        if (msg) {
+                            msg.isDeleted = true;
+                            updateMessageInDOM(action.messageId);
+                        }
+                    }
+                    
+                } else if (data.type === 'typing') {
+                    document.getElementById('typingIndicator').classList.remove('hidden');
+                    setTimeout(() => {
+                        document.getElementById('typingIndicator').classList.add('hidden');
+                    }, 3000);
+                    
+                } else if (data.type === 'fileInit') {
+                    fileTransfers[data.fileId] = {
+                        name: data.name,
+                        type: data.mimeType,
+                        size: data.size,
+                        chunks: [],
+                        totalChunks: data.totalChunks,
+                        receivedChunks: 0
+                    };
+                    displaySystemMessage(`📎 Receiving file: ${data.name} (${formatFileSize(data.size)})`);
+                    
+                } else if (data.type === 'fileChunk') {
+                    const transfer = fileTransfers[data.fileId];
+                    if (!transfer) return;
+
+                    const decrypted = await decryptChunk(data.chunk, data.iv);
+                    transfer.chunks[data.chunkIndex] = decrypted;
+                    transfer.receivedChunks++;
+                    
+                    if (transfer.receivedChunks === transfer.totalChunks) {
+                        const blob = new Blob(transfer.chunks, {type: transfer.type});
+                        displayFileMessage(peerUsername || 'Peer', transfer.name, transfer.type, transfer.size, blob, false, data.messageId);
+                        delete fileTransfers[data.fileId];
+                    }
+                }
+            };
+        }
 
         window.showJoinForm = function() {
             document.getElementById('joinForm').classList.remove('hidden');
@@ -430,146 +532,74 @@
         window.joinSession = async function() {
             const code = document.getElementById('connectionCode').value.trim();
             if (!code) {
-                showNotification('Error', 'Please enter a connection code');
+                showNotification('Error', 'Please paste the connection offer');
                 return;
             }
 
             try {
-                sessionId = atob(code);
+                const offerData = JSON.parse(atob(code));
+                
+                myUsername = generateUsername();
+                peerUsername = offerData.username;
+                
+                showLoading('Connecting...');
+                
+                await generateKeyPair();
+                peerPublicKey = await importPublicKey(offerData.publicKey);
+                
+                await setupPeerConnection(false);
+                
+                await peerConnection.setRemoteDescription(offerData.sdp);
+                
+                for (const candidate of offerData.candidates) {
+                    await peerConnection.addIceCandidate(candidate);
+                }
+                
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                
+                document.getElementById('myUsername').textContent = myUsername;
+                document.getElementById('myInitial').textContent = myUsername.charAt(0);
+                document.getElementById('peerUsername').textContent = peerUsername;
+                document.getElementById('peerInitial').textContent = peerUsername.charAt(0);
+                
             } catch (e) {
-                showNotification('Error', 'Invalid connection code');
+                hideLoading();
+                showNotification('Error', 'Invalid connection offer: ' + e.message);
+            }
+        };
+
+        window.submitAnswer = async function() {
+            const answerCode = document.getElementById('answerInput').value.trim();
+            if (!answerCode) {
+                showNotification('Error', 'Please paste the answer');
                 return;
             }
 
-            myUsername = generateUsername();
-            showLoading('Connecting and generating keys...');
-            await generateKeyPair();
-
-            const config = {appId: 'xsukax-lan-chat-v1'};
-            room = joinRoom(config, sessionId);
-
-            setupActions();
-            setupEventHandlers();
-
-            document.getElementById('myUsername').textContent = myUsername;
-            document.getElementById('myInitial').textContent = myUsername.charAt(0);
-
-            saveSession();
-        };
-
-        function setupActions() {
-            [sendEncrypted, getEncrypted] = room.makeAction('encrypted');
-            [sendTyping, getTyping] = room.makeAction('typing');
-            [sendUserInfo, getUserInfo] = room.makeAction('userinfo');
-            [sendKey, getKey] = room.makeAction('key');
-            [sendFileInit, getFileInit] = room.makeAction('fileinit');
-            [sendFileChunk, getFileChunk] = room.makeAction('filechunk');
-            [sendMessageAction, getMessageAction] = room.makeAction('msgaction');
-
-            getKey(async (data, peerId) => {
-                if (peerPublicKey) return;
+            try {
+                showLoading('Completing connection...');
                 
-                peerPublicKey = await importPublicKey(data.publicKey);
-                await deriveSharedSecret();
-                const exported = await exportPublicKey(myKeyPair.publicKey);
-                sendKey({publicKey: exported}, peerId);
-                sendUserInfo({username: myUsername});
-            });
-
-            getUserInfo((data) => {
-                peerUsername = data.username;
+                const answerData = JSON.parse(atob(answerCode));
+                
+                peerUsername = answerData.username;
+                peerPublicKey = await importPublicKey(answerData.publicKey);
+                
+                await peerConnection.setRemoteDescription(answerData.sdp);
+                
+                for (const candidate of answerData.candidates) {
+                    await peerConnection.addIceCandidate(candidate);
+                }
+                
                 document.getElementById('peerUsername').textContent = peerUsername;
                 document.getElementById('peerInitial').textContent = peerUsername.charAt(0);
-                document.getElementById('typingUsername').textContent = peerUsername;
-            });
-
-            getEncrypted(async (data, peerId) => {
-                const decrypted = await decryptMessage(data.encrypted, data.iv);
-                const messageData = JSON.parse(decrypted);
                 
-                messages.set(messageData.id, {
-                    id: messageData.id,
-                    text: messageData.text,
-                    username: peerUsername || 'Peer',
-                    timestamp: messageData.timestamp,
-                    isOwn: false,
-                    isEdited: false,
-                    isDeleted: false
-                });
+                hideLoading();
                 
-                renderMessage(messageData.id);
-            });
-
-            getMessageAction(async (data) => {
-                const decrypted = await decryptMessage(data.encrypted, data.iv);
-                const action = JSON.parse(decrypted);
-                
-                if (action.action === 'edit') {
-                    const msg = messages.get(action.messageId);
-                    if (msg) {
-                        msg.text = action.newText;
-                        msg.isEdited = true;
-                        updateMessageInDOM(action.messageId);
-                    }
-                } else if (action.action === 'delete') {
-                    const msg = messages.get(action.messageId);
-                    if (msg) {
-                        msg.isDeleted = true;
-                        updateMessageInDOM(action.messageId);
-                    }
-                }
-            });
-
-            getTyping(() => {
-                document.getElementById('typingIndicator').classList.remove('hidden');
-                setTimeout(() => {
-                    document.getElementById('typingIndicator').classList.add('hidden');
-                }, 3000);
-            });
-
-            getFileInit((data) => {
-                fileTransfers[data.fileId] = {
-                    name: data.name,
-                    type: data.type,
-                    size: data.size,
-                    chunks: [],
-                    totalChunks: data.totalChunks,
-                    receivedChunks: 0
-                };
-                displaySystemMessage(`📎 Receiving file: ${data.name} (${formatFileSize(data.size)})`);
-            });
-
-            getFileChunk(async (data) => {
-                const transfer = fileTransfers[data.fileId];
-                if (!transfer) return;
-
-                const decrypted = await decryptChunk(data.chunk, data.iv);
-                transfer.chunks[data.chunkIndex] = decrypted;
-                transfer.receivedChunks++;
-                
-                if (transfer.receivedChunks === transfer.totalChunks) {
-                    const blob = new Blob(transfer.chunks, {type: transfer.type});
-                    displayFileMessage(peerUsername || 'Peer', transfer.name, transfer.type, transfer.size, blob, false, data.messageId);
-                    delete fileTransfers[data.fileId];
-                }
-            });
-        }
-
-        function setupEventHandlers() {
-            room.onPeerJoin(async (peerId) => {
-                if (peerPublicKey) return;
-                
-                const exported = await exportPublicKey(myKeyPair.publicKey);
-                setTimeout(() => {
-                    sendKey({publicKey: exported}, peerId);
-                    sendUserInfo({username: myUsername});
-                }, 500);
-            });
-
-            room.onPeerLeave(() => {
-                displaySystemMessage('Peer disconnected. Waiting for reconnection...');
-            });
-        }
+            } catch (e) {
+                hideLoading();
+                showNotification('Error', 'Invalid answer: ' + e.message);
+            }
+        };
 
         async function generateKeyPair() {
             myKeyPair = await crypto.subtle.generateKey(
@@ -577,11 +607,6 @@
                 true,
                 ['deriveKey', 'deriveBits']
             );
-        }
-
-        async function exportPublicKey(publicKey) {
-            const exported = await crypto.subtle.exportKey('raw', publicKey);
-            return Array.from(new Uint8Array(exported));
         }
 
         async function importPublicKey(keyData) {
@@ -613,8 +638,18 @@
             document.getElementById('fingerprint').textContent = fingerprint;
             document.getElementById('modalFingerprint').textContent = fingerprint;
 
-            hideLoading();
             showChatInterface();
+            
+            const exported = await crypto.subtle.exportKey('raw', myKeyPair.publicKey);
+            dataChannel.send(JSON.stringify({
+                type: 'publicKey',
+                key: Array.from(new Uint8Array(exported))
+            }));
+            
+            dataChannel.send(JSON.stringify({
+                type: 'username',
+                username: myUsername
+            }));
         }
 
         async function generateFingerprint(keyMaterial) {
@@ -688,14 +723,14 @@
             document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-green-500 flex-shrink-0';
             document.getElementById('statusText').textContent = 'Connected & Encrypted';
             
-            displaySystemMessage('🔒 Secure connection established');
+            displaySystemMessage('🔒 Secure P2P connection established');
             displaySystemMessage('⚠️ Verify fingerprint with peer via separate channel');
         }
 
         window.sendMessage = async function() {
             const input = document.getElementById('messageInput');
             const text = input.value.trim();
-            if (!text || !sharedSecret) return;
+            if (!text || !sharedSecret || !dataChannel) return;
 
             const messageId = generateMessageId();
             const messageData = {
@@ -705,7 +740,12 @@
             };
 
             const encrypted = await encryptMessage(JSON.stringify(messageData));
-            sendEncrypted(encrypted);
+            
+            dataChannel.send(JSON.stringify({
+                type: 'message',
+                encrypted: encrypted.encrypted,
+                iv: encrypted.iv
+            }));
 
             messages.set(messageId, {
                 id: messageId,
@@ -722,9 +762,9 @@
         };
 
         window.onTyping = function() {
-            if (sendTyping) {
+            if (dataChannel && dataChannel.readyState === 'open') {
                 clearTimeout(typingTimeout);
-                sendTyping({});
+                dataChannel.send(JSON.stringify({type: 'typing'}));
                 typingTimeout = setTimeout(() => {}, 1000);
             }
         };
@@ -738,7 +778,7 @@
                 return;
             }
 
-            if (!sharedSecret) {
+            if (!sharedSecret || !dataChannel) {
                 showNotification('Error', 'Connection not established yet.');
                 return;
             }
@@ -748,18 +788,19 @@
         };
 
         async function sendFile(file) {
-            const fileId = generateSessionId();
+            const fileId = generateMessageId();
             const messageId = generateMessageId();
             const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
 
-            sendFileInit({
+            dataChannel.send(JSON.stringify({
+                type: 'fileInit',
                 fileId: fileId,
                 name: file.name,
-                type: file.type,
+                mimeType: file.type,
                 size: file.size,
                 totalChunks: totalChunks,
                 messageId: messageId
-            });
+            }));
 
             showLoading(`Sending ${file.name}...`, true);
 
@@ -769,13 +810,15 @@
                 const chunk = await file.slice(start, end).arrayBuffer();
                 
                 const encrypted = await encryptChunk(chunk);
-                sendFileChunk({
+                
+                dataChannel.send(JSON.stringify({
+                    type: 'fileChunk',
                     fileId: fileId,
                     chunkIndex: i,
                     chunk: encrypted.chunk,
                     iv: encrypted.iv,
                     messageId: messageId
-                });
+                }));
 
                 const progress = ((i + 1) / totalChunks) * 100;
                 updateProgress(progress);
@@ -869,7 +912,12 @@
             };
 
             const encrypted = await encryptMessage(JSON.stringify(action));
-            sendMessageAction(encrypted);
+            
+            dataChannel.send(JSON.stringify({
+                type: 'action',
+                encrypted: encrypted.encrypted,
+                iv: encrypted.iv
+            }));
 
             updateMessageInDOM(currentEditingMessageId);
             closeAllModals();
@@ -887,7 +935,12 @@
             };
 
             const encrypted = await encryptMessage(JSON.stringify(action));
-            sendMessageAction(encrypted);
+            
+            dataChannel.send(JSON.stringify({
+                type: 'action',
+                encrypted: encrypted.encrypted,
+                iv: encrypted.iv
+            }));
 
             updateMessageInDOM(messageId);
         };
@@ -948,16 +1001,23 @@
             return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
         }
 
-        window.copyCode = function() {
-            const code = document.getElementById('codeDisplay').textContent;
+        window.copyOffer = function() {
+            const code = document.getElementById('offerCode').textContent;
             navigator.clipboard.writeText(code).then(() => {
-                showNotification('Success', 'Connection code copied! Share it with your peer on the LAN.');
+                showNotification('Success', 'Connection offer copied! Share it with your peer.');
+            });
+        };
+
+        window.copyAnswer = function() {
+            const code = document.getElementById('answerCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                showNotification('Success', 'Answer copied! Send it back to the host.');
             });
         };
 
         window.endSession = function() {
-            if (room) room.leave();
-            clearSession();
+            if (peerConnection) peerConnection.close();
+            if (dataChannel) dataChannel.close();
             location.reload();
         };
 
@@ -968,9 +1028,8 @@
         }
 
         window.addEventListener('beforeunload', () => {
-            if (room) {
-                saveSession();
-            }
+            if (peerConnection) peerConnection.close();
+            if (dataChannel) dataChannel.close();
         });
     </script>
 </body>
