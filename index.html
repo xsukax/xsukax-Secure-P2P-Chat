@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>xsukax Secure P2P Chat</title>
-    <!-- Tailwind CDN: Intentionally used for single-file distribution. For production with build process, use PostCSS/CLI. -->
+    <!-- Tailwind CDN: Used for single-file distribution on IPFS. Browser warning is expected and can be ignored. -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -105,14 +105,14 @@
                         <div class="flex gap-3">
                             <svg class="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                             <div class="text-xs sm:text-sm text-gray-300">
-                                <strong class="text-white">Privacy First:</strong>
+                                <strong class="text-white">Privacy & Connection:</strong>
                                 <ul class="mt-2 space-y-1 text-gray-400">
                                     <li>• ECDH + AES-256-GCM encryption</li>
-                                    <li>• Direct P2P via BitTorrent trackers</li>
-                                    <li>• Messages never stored</li>
-                                    <li>• Works across different networks globally</li>
+                                    <li>• BitTorrent trackers (not Nostr)</li>
+                                    <li>• Free TURN servers for NAT traversal</li>
+                                    <li>• Works across any network globally</li>
                                 </ul>
-                                <p class="mt-2 text-xs text-gray-500">Connection time: 5-15 seconds for peer discovery. Works best on open networks (home WiFi, mobile data).</p>
+                                <p class="mt-2 text-xs text-gray-500">Connection: 5-20 seconds. Direct P2P when possible, relay through free TURN servers if needed.</p>
                             </div>
                         </div>
                     </div>
@@ -298,11 +298,22 @@
             await generateKeyPair();
             hideLoading();
 
+            console.log('Using BitTorrent-only strategy with TURN servers');
             const config = {
                 appId: 'xsukax-secure-chat-v1',
-                relayUrls: null // Disable Nostr, use only BitTorrent
+                rtcConfig: {
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun2.l.google.com:19302' },
+                        { urls: 'stun:global.stun.twilio.com:3478' },
+                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+                        { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
+                    ]
+                }
             };
-            room = joinRoom(config, sessionId);
+            room = joinRoom(config, sessionId, 'torrent');
 
             setupActions();
             setupEventHandlers();
@@ -340,11 +351,22 @@
             showLoading('Connecting and generating keys...');
             await generateKeyPair();
 
+            console.log('Using BitTorrent-only strategy with TURN servers');
             const config = {
                 appId: 'xsukax-secure-chat-v1',
-                relayUrls: null // Disable Nostr, use only BitTorrent
+                rtcConfig: {
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun2.l.google.com:19302' },
+                        { urls: 'stun:global.stun.twilio.com:3478' },
+                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+                        { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
+                    ]
+                }
             };
-            room = joinRoom(config, sessionId);
+            room = joinRoom(config, sessionId, 'torrent');
 
             setupActions();
             setupEventHandlers();
@@ -409,21 +431,21 @@
             // Connection status updates
             setTimeout(() => {
                 if (!peerPublicKey) {
-                    displaySystemMessage('🔍 Discovering peer via BitTorrent trackers...');
+                    displaySystemMessage('🔍 Connecting via BitTorrent trackers (Nostr disabled)...');
                 }
             }, 5000);
 
             setTimeout(() => {
                 if (!peerPublicKey && document.getElementById('connectionDisplay') && !document.getElementById('connectionDisplay').classList.contains('hidden')) {
-                    displaySystemMessage('⏱️ Still searching for peer...');
-                    displaySystemMessage('💡 Ensure both users have entered the connection code');
+                    displaySystemMessage('⏱️ Still discovering peer...');
+                    displaySystemMessage('💡 Both users must enter the connection code and wait');
                 }
             }, 15000);
 
             setTimeout(() => {
                 if (!peerPublicKey && document.getElementById('connectionDisplay') && !document.getElementById('connectionDisplay').classList.contains('hidden')) {
-                    displaySystemMessage('⚠️ Connection taking longer than usual');
-                    displaySystemMessage('💡 Both peers should be on open networks (avoid corporate/restricted WiFi)');
+                    displaySystemMessage('⚠️ Using TURN relay servers for difficult connections...');
+                    displaySystemMessage('💡 This may take up to 30 seconds on restrictive networks');
                 }
             }, 30000);
         }
