@@ -111,13 +111,14 @@
                         <div class="flex gap-3">
                             <svg class="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                             <div class="text-xs sm:text-sm text-gray-300">
-                                <strong class="text-white">Reliable Connection:</strong>
+                                <strong class="text-white">🔒 Secure Connection:</strong>
                                 <ul class="mt-2 space-y-1 text-gray-400">
-                                    <li>• PeerJS Cloud signaling (0.peerjs.com)</li>
-                                    <li>• Free public STUN/TURN servers</li>
+                                    <li>• TURN credentials fetched securely from server</li>
+                                    <li>• Your own TURN server for reliable connections</li>
                                     <li>• ECDH + AES-256-GCM encryption</li>
-                                    <li>• Works across most networks</li>
+                                    <li>• Works even with Symmetric NAT</li>
                                 </ul>
+                                <p class="mt-2 text-xs text-green-400">✅ Configured for maximum compatibility</p>
                             </div>
                         </div>
                     </div>
@@ -218,6 +219,29 @@
     <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
     <script>
         let peer, conn, myUsername, peerUsername, myKeyPair, peerPublicKey, sharedSecret, typingTimeout;
+        let iceServers = null;
+        
+        // ⚠️ IMPORTANT: Change this to your server URL
+        const SIGNALING_SERVER = 'https://xsukax.net/secure-signaling.php';
+        // Examples:
+        // const SIGNALING_SERVER = 'https://example.com/secure-signaling.php';
+        // const SIGNALING_SERVER = 'http://localhost:8000/secure-signaling.php';
+
+        // Fetch ICE server configuration from PHP server
+        async function fetchIceConfig() {
+            try {
+                const response = await fetch(SIGNALING_SERVER + '/ice-config');
+                const data = await response.json();
+                iceServers = data.iceServers;
+                console.log('ICE config loaded:', iceServers.length, 'servers');
+                return true;
+            } catch (error) {
+                console.error('Failed to fetch ICE config:', error);
+                // Fallback to basic STUN only
+                iceServers = [{ urls: 'stun:stun.l.google.com:19302' }];
+                return false;
+            }
+        }
 
         function showNotification(title, message) {
             document.getElementById('notifTitle').textContent = title;
@@ -250,16 +274,27 @@
         };
 
         window.createSession = async function() {
-            showLoading('Generating keys...');
+            showLoading('Loading secure configuration...');
+            
+            // Fetch TURN config from server first
+            await fetchIceConfig();
+            
+            showLoading('Generating encryption keys...');
             await generateKeyPair();
 
-            peer = new Peer();
+            peer = new Peer(null, {
+                config: {
+                    iceServers: iceServers
+                },
+                debug: 2
+            });
 
             peer.on('open', (id) => {
                 hideLoading();
                 document.getElementById('codeDisplay').textContent = id;
                 document.getElementById('connectionDisplay').classList.remove('hidden');
                 console.log('My ID:', id);
+                console.log('Using', iceServers.length, 'ICE servers (including TURN)');
             });
 
             peer.on('connection', (c) => {
@@ -296,12 +331,23 @@
             }
 
             myUsername = username;
-            showLoading('Connecting...');
+            showLoading('Loading secure configuration...');
+            
+            // Fetch TURN config from server first
+            await fetchIceConfig();
+            
+            showLoading('Connecting with encryption...');
             await generateKeyPair();
 
-            peer = new Peer();
+            peer = new Peer(null, {
+                config: {
+                    iceServers: iceServers
+                },
+                debug: 2
+            });
 
             peer.on('open', () => {
+                console.log('Using', iceServers.length, 'ICE servers (including TURN)');
                 conn = peer.connect(code);
                 setupConnection();
             });
@@ -316,6 +362,7 @@
         function setupConnection() {
             conn.on('open', async () => {
                 console.log('Connection opened');
+                displaySystemMessage('✅ P2P connection established');
                 
                 const usernameToSend = myUsername || document.getElementById('createUsername').value.trim();
                 if (!usernameToSend) {
@@ -327,6 +374,35 @@
                 const exported = await exportPublicKey(myKeyPair.publicKey);
                 conn.send({type:'key', publicKey:exported, username:myUsername});
             });
+
+            // Monitor ICE connection state
+            if (conn.peerConnection) {
+                conn.peerConnection.oniceconnectionstatechange = () => {
+                    const state = conn.peerConnection.iceConnectionState;
+                    console.log('ICE Connection State:', state);
+                    
+                    if (state === 'connected' || state === 'completed') {
+                        displaySystemMessage('🔗 Direct connection active');
+                    } else if (state === 'checking') {
+                        displaySystemMessage('🔍 Establishing connection...');
+                    } else if (state === 'failed') {
+                        displaySystemMessage('⚠️ Connection failed - check TURN server');
+                    }
+                };
+
+                conn.peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        const type = event.candidate.type;
+                        console.log('ICE Candidate Type:', type);
+                        
+                        if (type === 'relay') {
+                            displaySystemMessage('🔄 Using TURN relay server');
+                        } else if (type === 'srflx') {
+                            displaySystemMessage('🌐 Using STUN (direct connection)');
+                        }
+                    }
+                };
+            }
 
             conn.on('data', async (data) => {
                 if (data.type === 'key') {
