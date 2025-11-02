@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>xsukax Secure P2P Chat</title>
+    <!-- Tailwind CDN: Intentionally used for single-file distribution. For production with build process, use PostCSS/CLI. -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -13,10 +14,8 @@
         .modal-backdrop { backdrop-filter: blur(4px); }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes spin { to { transform: rotate(360deg); } }
         .animate-slideUp { animation: slideUp 0.3s ease-out; }
         .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
-        .animate-spin { animation: spin 1s linear infinite; }
         .chat-message { max-width: 85%; word-wrap: break-word; }
         @media (max-width: 640px) { .chat-message { max-width: 75%; } }
         .mobile-safe { padding-bottom: env(safe-area-inset-bottom); }
@@ -24,6 +23,7 @@
 </head>
 <body class="bg-gray-900 min-h-screen">
     <div class="min-h-screen flex flex-col max-w-6xl mx-auto">
+        <!-- Header -->
         <div class="bg-gray-800 border-b border-gray-700 px-4 sm:px-6 py-4 sticky top-0 z-10">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -42,7 +42,9 @@
             </div>
         </div>
 
+        <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Setup Screen -->
             <div id="setupArea" class="flex-1 overflow-y-auto p-4 sm:p-8">
                 <div class="max-w-2xl mx-auto">
                     <div class="text-center mb-8">
@@ -50,7 +52,7 @@
                             <svg class="w-8 sm:w-10 h-8 sm:h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
                         </div>
                         <h2 class="text-xl sm:text-2xl font-bold text-white mb-2">Private 1-on-1 Chat</h2>
-                        <p class="text-sm sm:text-base text-gray-400">End-to-end encrypted • PeerJS Cloud</p>
+                        <p class="text-sm sm:text-base text-gray-400">Fully decentralized • End-to-end encrypted</p>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
@@ -59,7 +61,7 @@
                                 <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                             </div>
                             <h3 class="text-white font-semibold mb-2 text-sm sm:text-base">Start New Chat</h3>
-                            <p class="text-xs sm:text-sm text-gray-400">Create connection code</p>
+                            <p class="text-xs sm:text-sm text-gray-400">Create and share connection code</p>
                         </button>
 
                         <button onclick="showJoinForm()" class="p-4 sm:p-6 bg-gray-700 hover:bg-gray-600 border border-gray-600 rounded-lg transition group">
@@ -73,12 +75,8 @@
 
                     <div id="joinForm" class="hidden space-y-4 animate-slideUp">
                         <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Your Username</label>
-                            <input type="text" id="joinUsername" placeholder="Enter your name" maxlength="20" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm sm:text-base">
-                        </div>
-                        <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">Connection Code</label>
-                            <input type="text" id="connectionCode" placeholder="Paste connection code" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm sm:text-base">
+                            <input type="text" id="connectionCode" placeholder="Paste the connection code here" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm sm:text-base">
                         </div>
                         <div class="flex gap-3">
                             <button onclick="joinSession()" class="flex-1 px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition text-sm sm:text-base">Connect</button>
@@ -88,22 +86,18 @@
 
                     <div id="connectionDisplay" class="hidden animate-slideUp">
                         <div class="bg-gray-700 border border-gray-600 rounded-lg p-4 sm:p-6">
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Your Username</label>
-                                <input type="text" id="createUsername" placeholder="Enter your name" maxlength="20" class="w-full px-4 py-3 bg-gray-600 border border-gray-500 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none text-sm sm:text-base">
-                            </div>
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-white font-semibold text-sm sm:text-base">Connection Code</h3>
+                                <h3 class="text-white font-semibold text-sm sm:text-base">Your Connection Code</h3>
                                 <div class="flex items-center gap-2">
                                     <span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
-                                    <span class="text-xs text-gray-400">Waiting...</span>
+                                    <span class="text-xs text-gray-400 hidden sm:inline">Waiting...</span>
                                 </div>
                             </div>
                             <div class="bg-gray-800 border border-gray-600 rounded-lg p-3 sm:p-4 mb-4">
                                 <code id="codeDisplay" class="text-green-400 text-xs sm:text-sm break-all select-all block"></code>
                             </div>
-                            <button onclick="copyCode()" class="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition text-sm sm:text-base">📋 Copy Code</button>
-                            <p class="text-xs text-gray-400 mt-4 text-center">Share this code securely with your contact</p>
+                            <button onclick="copyCode()" class="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition text-sm sm:text-base">📋 Copy to Clipboard</button>
+                            <p class="text-xs text-gray-400 mt-4 text-center">Share securely (Signal, encrypted email, in person)</p>
                         </div>
                     </div>
 
@@ -111,21 +105,23 @@
                         <div class="flex gap-3">
                             <svg class="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                             <div class="text-xs sm:text-sm text-gray-300">
-                                <strong class="text-white">🔒 Secure Connection:</strong>
+                                <strong class="text-white">Privacy First:</strong>
                                 <ul class="mt-2 space-y-1 text-gray-400">
-                                    <li>• TURN credentials fetched securely from server</li>
-                                    <li>• Your own TURN server for reliable connections</li>
                                     <li>• ECDH + AES-256-GCM encryption</li>
-                                    <li>• Works even with Symmetric NAT</li>
+                                    <li>• Direct P2P (no servers)</li>
+                                    <li>• Messages never stored</li>
+                                    <li>• Works on IPFS</li>
                                 </ul>
-                                <p class="mt-2 text-xs text-green-400">✅ Configured for maximum compatibility</p>
+                                <p class="mt-2 text-xs text-gray-500">Note: Works best on open networks. Some corporate/restricted networks may block P2P connections.</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Chat Interface -->
             <div id="chatInterface" class="hidden flex-1 flex flex-col">
+                <!-- User Info Banner -->
                 <div class="bg-gray-800 border-b border-gray-700 px-4 py-3">
                     <div class="flex items-center justify-between text-xs sm:text-sm">
                         <div class="flex items-center gap-2 min-w-0">
@@ -133,8 +129,8 @@
                                 <span class="text-white text-xs font-bold" id="myInitial">?</span>
                             </div>
                             <div class="min-w-0">
-                                <p class="text-white font-medium truncate" id="myUsername">You</p>
-                                <p class="text-gray-400 text-xs">Online</p>
+                                <p class="text-white font-medium truncate" id="myUsername">Loading...</p>
+                                <p class="text-gray-400 text-xs">You</p>
                             </div>
                         </div>
                         <svg class="w-4 h-4 text-gray-500 flex-shrink-0 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12M8 12h12M8 17h12M3 7h.01M3 12h.01M3 17h.01"></path></svg>
@@ -143,13 +139,14 @@
                                 <span class="text-white text-xs font-bold" id="peerInitial">?</span>
                             </div>
                             <div class="min-w-0">
-                                <p class="text-white font-medium truncate" id="peerUsername">Peer</p>
-                                <p class="text-gray-400 text-xs">Online</p>
+                                <p class="text-white font-medium truncate" id="peerUsername">Waiting...</p>
+                                <p class="text-gray-400 text-xs">Peer</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Security Fingerprint -->
                 <div class="bg-yellow-900/30 border-b border-yellow-700 px-4 py-2">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2 min-w-0 flex-1">
@@ -160,15 +157,18 @@
                     </div>
                 </div>
 
+                <!-- Messages -->
                 <div id="chatArea" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-900"></div>
 
+                <!-- Typing Indicator -->
                 <div id="typingIndicator" class="hidden px-4 py-2 text-xs sm:text-sm text-gray-400 bg-gray-800/50">
                     <span class="animate-pulse"><span id="typingUsername">Peer</span> is typing...</span>
                 </div>
 
+                <!-- Input -->
                 <div class="border-t border-gray-700 bg-gray-800 p-3 sm:p-4 mobile-safe">
                     <div class="flex gap-2 sm:gap-3">
-                        <input type="text" id="messageInput" placeholder="Type message..." oninput="onTyping()" onkeypress="if(event.key==='Enter') sendMessage()" class="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm sm:text-base">
+                        <input type="text" id="messageInput" placeholder="Type secure message..." oninput="onTyping()" onkeypress="if(event.key==='Enter') sendMessage()" class="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm sm:text-base">
                         <button onclick="sendMessage()" class="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium rounded-lg transition flex items-center gap-2">
                             <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
                             <span class="hidden sm:inline">Send</span>
@@ -176,71 +176,83 @@
                     </div>
                     <div class="mt-2 flex items-center justify-between text-xs text-gray-500">
                         <span class="truncate">🔒 E2E Encrypted</span>
-                        <button onclick="endSession()" class="text-red-400 hover:text-red-300 ml-2">End</button>
+                        <button onclick="showEndSessionModal()" class="text-red-400 hover:text-red-300 ml-2">End</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Modals -->
     <div id="modalBackdrop" class="hidden fixed inset-0 bg-black/70 modal-backdrop flex items-center justify-center p-4 z-50 animate-fadeIn" onclick="closeAllModals()">
+        <!-- Verification Modal -->
         <div id="verificationModal" class="hidden bg-gray-800 border border-gray-700 rounded-lg max-w-md w-full p-6 animate-slideUp" onclick="event.stopPropagation()">
             <h3 class="text-xl font-bold text-white mb-4">Security Fingerprint</h3>
             <div class="space-y-4 text-sm text-gray-300">
-                <p>Both users should see the SAME fingerprint.</p>
+                <p>Both you and your peer should see the SAME fingerprint.</p>
                 <div class="bg-gray-900 border border-gray-700 rounded p-3">
-                    <p class="text-xs text-gray-400 mb-1">Fingerprint:</p>
+                    <p class="text-xs text-gray-400 mb-1">Your Fingerprint:</p>
                     <p class="fingerprint text-green-400 text-xs sm:text-sm" id="modalFingerprint"></p>
                 </div>
                 <p><strong class="text-white">To verify:</strong></p>
                 <ol class="list-decimal list-inside space-y-2 text-gray-400 text-xs sm:text-sm">
-                    <li>Compare via phone/video call</li>
-                    <li>If match → secure ✅</li>
-                    <li>If don't match → attack ⚠️</li>
+                    <li>Compare via phone call or video</li>
+                    <li>If they match → secure ✅</li>
+                    <li>If they don't → someone is attacking ⚠️</li>
                 </ol>
             </div>
             <button onclick="closeAllModals()" class="mt-6 w-full px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition">Got it</button>
         </div>
 
+        <!-- End Session Modal -->
+        <div id="endSessionModal" class="hidden bg-gray-800 border border-gray-700 rounded-lg max-w-md w-full p-6 animate-slideUp" onclick="event.stopPropagation()">
+            <h3 class="text-xl font-bold text-white mb-4">End Session?</h3>
+            <p class="text-gray-300 mb-6">Are you sure you want to end this secure session? All messages will be lost.</p>
+            <div class="flex gap-3">
+                <button onclick="endSession()" class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition">End Session</button>
+                <button onclick="closeAllModals()" class="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transition">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Notification Modal -->
         <div id="notificationModal" class="hidden bg-gray-800 border border-gray-700 rounded-lg max-w-md w-full p-6 animate-slideUp" onclick="event.stopPropagation()">
             <h3 class="text-xl font-bold text-white mb-4" id="notifTitle">Notice</h3>
             <p class="text-gray-300 mb-6" id="notifMessage"></p>
             <button onclick="closeAllModals()" class="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition">OK</button>
         </div>
 
+        <!-- Loading Modal -->
         <div id="loadingModal" class="hidden bg-gray-800 border border-gray-700 rounded-lg max-w-md w-full p-8 animate-slideUp" onclick="event.stopPropagation()">
             <div class="text-center">
-                <div class="w-12 h-12 border-4 border-purple-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4"></div>
                 <p class="text-gray-300" id="loadingMessage">Processing...</p>
             </div>
         </div>
     </div>
 
-    <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
-    <script>
-        let peer, conn, myUsername, peerUsername, myKeyPair, peerPublicKey, sharedSecret, typingTimeout;
-        let iceServers = null;
-        
-        // ⚠️ IMPORTANT: Change this to your server URL
-        const SIGNALING_SERVER = 'https://xsukax.net/secure-signaling.php';
-        // Examples:
-        // const SIGNALING_SERVER = 'https://example.com/secure-signaling.php';
-        // const SIGNALING_SERVER = 'http://localhost:8000/secure-signaling.php';
+    <script type="module">
+        import {joinRoom} from 'https://cdn.jsdelivr.net/npm/trystero@0.22.0/+esm'
 
-        // Fetch ICE server configuration from PHP server
-        async function fetchIceConfig() {
-            try {
-                const response = await fetch(SIGNALING_SERVER + '/ice-config');
-                const data = await response.json();
-                iceServers = data.iceServers;
-                console.log('ICE config loaded:', iceServers.length, 'servers');
-                return true;
-            } catch (error) {
-                console.error('Failed to fetch ICE config:', error);
-                // Fallback to basic STUN only
-                iceServers = [{ urls: 'stun:stun.l.google.com:19302' }];
-                return false;
-            }
+        let room, sendEncrypted, getEncrypted, sendTyping, getTyping, sendUserInfo, getUserInfo, sendKey, getKey;
+        let myKeyPair, peerPublicKey, sharedSecret;
+        let sessionId, myUsername, peerUsername;
+        let typingTimeout;
+        let isConnected = false;
+
+        const adjectives = ['Swift', 'Brave', 'Quiet', 'Clever', 'Bold', 'Wise', 'Silent', 'Noble', 'Cosmic', 'Mystic', 'Stellar', 'Lunar', 'Solar', 'Arctic', 'Crimson', 'Azure', 'Emerald', 'Golden', 'Silver', 'Crystal'];
+        const nouns = ['Fox', 'Wolf', 'Eagle', 'Tiger', 'Dragon', 'Phoenix', 'Falcon', 'Hawk', 'Lion', 'Panther', 'Raven', 'Serpent', 'Bear', 'Owl', 'Lynx', 'Cobra', 'Viper', 'Shark', 'Dolphin', 'Whale'];
+
+        function generateUsername() {
+            const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+            const noun = nouns[Math.floor(Math.random() * nouns.length)];
+            const num = Math.floor(Math.random() * 999);
+            return `${adj}${noun}${num}`;
+        }
+
+        function generateSessionId() {
+            const array = new Uint8Array(16);
+            crypto.getRandomValues(array);
+            return Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
         }
 
         function showNotification(title, message) {
@@ -266,47 +278,37 @@
             document.getElementById('verificationModal').classList.remove('hidden');
         };
 
+        window.showEndSessionModal = function() {
+            document.getElementById('modalBackdrop').classList.remove('hidden');
+            document.getElementById('endSessionModal').classList.remove('hidden');
+        };
+
         window.closeAllModals = function() {
             document.getElementById('modalBackdrop').classList.add('hidden');
             document.getElementById('verificationModal').classList.add('hidden');
+            document.getElementById('endSessionModal').classList.add('hidden');
             document.getElementById('notificationModal').classList.add('hidden');
             document.getElementById('loadingModal').classList.add('hidden');
         };
 
         window.createSession = async function() {
-            showLoading('Loading secure configuration...');
-            
-            // Fetch TURN config from server first
-            await fetchIceConfig();
-            
+            sessionId = generateSessionId();
+            myUsername = generateUsername();
             showLoading('Generating encryption keys...');
             await generateKeyPair();
+            hideLoading();
 
-            peer = new Peer(null, {
-                config: {
-                    iceServers: iceServers
-                },
-                debug: 2
-            });
+            const config = {appId: 'xsukax-secure-chat-v1'};
+            room = joinRoom(config, sessionId);
 
-            peer.on('open', (id) => {
-                hideLoading();
-                document.getElementById('codeDisplay').textContent = id;
-                document.getElementById('connectionDisplay').classList.remove('hidden');
-                console.log('My ID:', id);
-                console.log('Using', iceServers.length, 'ICE servers (including TURN)');
-            });
+            setupActions();
+            setupEventHandlers();
 
-            peer.on('connection', (c) => {
-                conn = c;
-                setupConnection();
-            });
-
-            peer.on('error', (err) => {
-                hideLoading();
-                console.error('Peer error:', err);
-                showNotification('Error', 'Connection failed: ' + err.type);
-            });
+            const connectionCode = btoa(sessionId);
+            document.getElementById('codeDisplay').textContent = connectionCode;
+            document.getElementById('connectionDisplay').classList.remove('hidden');
+            document.getElementById('myUsername').textContent = myUsername;
+            document.getElementById('myInitial').textContent = myUsername.charAt(0);
         };
 
         window.showJoinForm = function() {
@@ -318,134 +320,99 @@
         };
 
         window.joinSession = async function() {
-            const username = document.getElementById('joinUsername').value.trim();
             const code = document.getElementById('connectionCode').value.trim();
-
-            if (!username) {
-                showNotification('Error', 'Please enter your username');
-                return;
-            }
             if (!code) {
-                showNotification('Error', 'Please enter connection code');
+                showNotification('Error', 'Please enter a connection code');
                 return;
             }
 
-            myUsername = username;
-            showLoading('Loading secure configuration...');
-            
-            // Fetch TURN config from server first
-            await fetchIceConfig();
-            
-            showLoading('Connecting with encryption...');
+            try {
+                sessionId = atob(code);
+            } catch (e) {
+                showNotification('Error', 'Invalid connection code');
+                return;
+            }
+
+            myUsername = generateUsername();
+            showLoading('Connecting and generating keys...');
             await generateKeyPair();
 
-            peer = new Peer(null, {
-                config: {
-                    iceServers: iceServers
-                },
-                debug: 2
-            });
+            const config = {appId: 'xsukax-secure-chat-v1'};
+            room = joinRoom(config, sessionId);
 
-            peer.on('open', () => {
-                console.log('Using', iceServers.length, 'ICE servers (including TURN)');
-                conn = peer.connect(code);
-                setupConnection();
-            });
+            setupActions();
+            setupEventHandlers();
 
-            peer.on('error', (err) => {
-                hideLoading();
-                console.error('Peer error:', err);
-                showNotification('Error', 'Failed to connect: ' + err.type);
-            });
+            document.getElementById('myUsername').textContent = myUsername;
+            document.getElementById('myInitial').textContent = myUsername.charAt(0);
         };
 
-        function setupConnection() {
-            conn.on('open', async () => {
-                console.log('Connection opened');
-                displaySystemMessage('✅ P2P connection established');
+        function setupActions() {
+            [sendEncrypted, getEncrypted] = room.makeAction('encrypted');
+            [sendTyping, getTyping] = room.makeAction('typing');
+            [sendUserInfo, getUserInfo] = room.makeAction('userinfo');
+            [sendKey, getKey] = room.makeAction('key');
+
+            getKey(async (data, peerId) => {
+                if (peerPublicKey) return; // Already exchanged keys
                 
-                const usernameToSend = myUsername || document.getElementById('createUsername').value.trim();
-                if (!usernameToSend) {
-                    showNotification('Error', 'Please enter your username');
-                    return;
-                }
-                myUsername = usernameToSend;
-
+                peerPublicKey = await importPublicKey(data.publicKey);
+                await deriveSharedSecret();
                 const exported = await exportPublicKey(myKeyPair.publicKey);
-                conn.send({type:'key', publicKey:exported, username:myUsername});
+                sendKey({publicKey: exported}, peerId);
+                sendUserInfo({username: myUsername});
             });
 
-            // Monitor ICE connection state
-            if (conn.peerConnection) {
-                conn.peerConnection.oniceconnectionstatechange = () => {
-                    const state = conn.peerConnection.iceConnectionState;
-                    console.log('ICE Connection State:', state);
-                    
-                    if (state === 'connected' || state === 'completed') {
-                        displaySystemMessage('🔗 Direct connection active');
-                    } else if (state === 'checking') {
-                        displaySystemMessage('🔍 Establishing connection...');
-                    } else if (state === 'failed') {
-                        displaySystemMessage('⚠️ Connection failed - check TURN server');
-                    }
-                };
-
-                conn.peerConnection.onicecandidate = (event) => {
-                    if (event.candidate) {
-                        const type = event.candidate.type;
-                        console.log('ICE Candidate Type:', type);
-                        
-                        if (type === 'relay') {
-                            displaySystemMessage('🔄 Using TURN relay server');
-                        } else if (type === 'srflx') {
-                            displaySystemMessage('🌐 Using STUN (direct connection)');
-                        }
-                    }
-                };
-            }
-
-            conn.on('data', async (data) => {
-                if (data.type === 'key') {
-                    if (peerPublicKey) return;
-                    
-                    peerPublicKey = await importPublicKey(data.publicKey);
-                    peerUsername = data.username;
-                    await deriveSharedSecret();
-                    
-                    const exported = await exportPublicKey(myKeyPair.publicKey);
-                    conn.send({type:'key', publicKey:exported, username:myUsername});
-                    
-                    hideLoading();
-                    showChatInterface();
-                    
-                } else if (data.type === 'message' && sharedSecret) {
-                    const decrypted = await decryptMessage(data.encrypted, data.iv);
-                    displayMessage(peerUsername, decrypted, false);
-                    
-                } else if (data.type === 'typing') {
-                    document.getElementById('typingIndicator').classList.remove('hidden');
-                    setTimeout(() => {
-                        document.getElementById('typingIndicator').classList.add('hidden');
-                    }, 3000);
-                }
+            getUserInfo((data) => {
+                peerUsername = data.username;
+                document.getElementById('peerUsername').textContent = peerUsername;
+                document.getElementById('peerInitial').textContent = peerUsername.charAt(0);
+                document.getElementById('typingUsername').textContent = peerUsername;
             });
 
-            conn.on('close', () => {
-                displaySystemMessage('Peer disconnected');
+            getEncrypted(async (data, peerId) => {
+                const decrypted = await decryptMessage(data.encrypted, data.iv);
+                displayMessage(peerUsername || 'Peer', decrypted, false);
+            });
+
+            getTyping(() => {
+                document.getElementById('typingIndicator').classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('typingIndicator').classList.add('hidden');
+                }, 3000);
+            });
+        }
+
+        function setupEventHandlers() {
+            room.onPeerJoin(async (peerId) => {
+                if (peerPublicKey) return; // Already connected
+                
+                const exported = await exportPublicKey(myKeyPair.publicKey);
+                setTimeout(() => {
+                    sendKey({publicKey: exported}, peerId);
+                    sendUserInfo({username: myUsername});
+                }, 500);
+            });
+
+            room.onPeerLeave(() => {
+                displaySystemMessage('Peer disconnected. Session ended.');
                 setTimeout(() => location.reload(), 3000);
             });
 
-            conn.on('error', (err) => {
-                console.error('Connection error:', err);
-                showNotification('Error', 'Connection error occurred');
-            });
+            // Connection timeout - if no peer after 30 seconds
+            setTimeout(() => {
+                if (!peerPublicKey && document.getElementById('connectionDisplay').classList.contains('hidden') === false) {
+                    displaySystemMessage('⏱️ Still waiting for peer to connect...');
+                    displaySystemMessage('💡 Tip: Make sure your peer has entered the connection code');
+                }
+            }, 30000);
         }
 
         async function generateKeyPair() {
             myKeyPair = await crypto.subtle.generateKey(
-                {name:'ECDH', namedCurve:'P-384'},
+                {name: 'ECDH', namedCurve: 'P-384'},
                 true,
-                ['deriveKey','deriveBits']
+                ['deriveKey', 'deriveBits']
             );
         }
 
@@ -458,7 +425,7 @@
             return await crypto.subtle.importKey(
                 'raw',
                 new Uint8Array(keyData),
-                {name:'ECDH', namedCurve:'P-384'},
+                {name: 'ECDH', namedCurve: 'P-384'},
                 true,
                 []
             );
@@ -466,7 +433,7 @@
 
         async function deriveSharedSecret() {
             const derivedBits = await crypto.subtle.deriveBits(
-                {name:'ECDH', public:peerPublicKey},
+                {name: 'ECDH', public: peerPublicKey},
                 myKeyPair.privateKey,
                 256
             );
@@ -474,96 +441,104 @@
             sharedSecret = await crypto.subtle.importKey(
                 'raw',
                 derivedBits,
-                {name:'AES-GCM', length:256},
+                {name: 'AES-GCM', length: 256},
                 false,
-                ['encrypt','decrypt']
+                ['encrypt', 'decrypt']
             );
 
             const fingerprint = await generateFingerprint(derivedBits);
             document.getElementById('fingerprint').textContent = fingerprint;
             document.getElementById('modalFingerprint').textContent = fingerprint;
+
+            hideLoading();
+            showChatInterface();
         }
 
         async function generateFingerprint(keyMaterial) {
             const hash = await crypto.subtle.digest('SHA-256', keyMaterial);
             const hashArray = Array.from(new Uint8Array(hash));
-            const hashHex = hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
-            return hashHex.substring(0,32).match(/.{1,4}/g).join(' ').toUpperCase();
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex.substring(0, 32).match(/.{1,4}/g).join(' ').toUpperCase();
         }
 
         async function encryptMessage(text) {
             const encoder = new TextEncoder();
             const data = encoder.encode(text);
             const iv = crypto.getRandomValues(new Uint8Array(12));
-            const encrypted = await crypto.subtle.encrypt({name:'AES-GCM',iv:iv}, sharedSecret, data);
-            return {encrypted:Array.from(new Uint8Array(encrypted)), iv:Array.from(iv)};
+            
+            const encrypted = await crypto.subtle.encrypt(
+                {name: 'AES-GCM', iv: iv},
+                sharedSecret,
+                data
+            );
+
+            return {
+                encrypted: Array.from(new Uint8Array(encrypted)),
+                iv: Array.from(iv)
+            };
         }
 
         async function decryptMessage(encryptedArray, ivArray) {
             const encrypted = new Uint8Array(encryptedArray);
             const iv = new Uint8Array(ivArray);
-            const decrypted = await crypto.subtle.decrypt({name:'AES-GCM',iv:iv}, sharedSecret, encrypted);
-            return new TextDecoder().decode(decrypted);
+            
+            const decrypted = await crypto.subtle.decrypt(
+                {name: 'AES-GCM', iv: iv},
+                sharedSecret,
+                encrypted
+            );
+
+            const decoder = new TextDecoder();
+            return decoder.decode(decrypted);
         }
 
         function showChatInterface() {
+            if (isConnected) return; // Prevent multiple calls
+            isConnected = true;
+            
             document.getElementById('setupArea').classList.add('hidden');
             document.getElementById('chatInterface').classList.remove('hidden');
             document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-green-500 flex-shrink-0';
-            document.getElementById('statusText').textContent = 'Connected';
-            
-            document.getElementById('myUsername').textContent = myUsername;
-            document.getElementById('myInitial').textContent = myUsername.charAt(0).toUpperCase();
-            document.getElementById('peerUsername').textContent = peerUsername;
-            document.getElementById('peerInitial').textContent = peerUsername.charAt(0).toUpperCase();
-            document.getElementById('typingUsername').textContent = peerUsername;
+            document.getElementById('statusText').textContent = 'Connected & Encrypted';
             
             displaySystemMessage('🔒 Secure connection established');
-            displaySystemMessage('⚠️ Verify fingerprint via separate channel');
+            displaySystemMessage('⚠️ Verify fingerprint with peer via separate channel');
         }
 
         window.sendMessage = async function() {
             const input = document.getElementById('messageInput');
             const text = input.value.trim();
-            if (!text || !sharedSecret || !conn) return;
+            if (!text || !sharedSecret) return;
 
             const encrypted = await encryptMessage(text);
-            conn.send({type:'message', encrypted:encrypted.encrypted, iv:encrypted.iv});
+            sendEncrypted(encrypted);
             displayMessage(myUsername, text, true);
             input.value = '';
         };
 
         window.onTyping = function() {
-            if (conn && conn.open) {
+            if (sendTyping) {
                 clearTimeout(typingTimeout);
-                conn.send({type:'typing'});
+                sendTyping({});
                 typingTimeout = setTimeout(() => {}, 1000);
             }
         };
 
-        function autoScrollChat() {
-            const chatArea = document.getElementById('chatArea');
-            if (chatArea) {
-                setTimeout(() => {
-                    chatArea.scrollTo({top:chatArea.scrollHeight, behavior:'smooth'});
-                }, 100);
-            }
-        }
-
         function displayMessage(username, text, isOwn) {
             const chatArea = document.getElementById('chatArea');
-            const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+            
             const messageDiv = document.createElement('div');
-            messageDiv.className = `flex ${isOwn?'justify-end':'justify-start'} animate-slideUp`;
+            messageDiv.className = `flex ${isOwn ? 'justify-end' : 'justify-start'} animate-slideUp`;
             messageDiv.innerHTML = `
-                <div class="chat-message ${isOwn?'bg-gradient-to-r from-purple-600 to-pink-600':'bg-gray-700'} rounded-lg px-3 sm:px-4 py-2 shadow-lg">
-                    <p class="text-xs font-medium ${isOwn?'text-purple-200':'text-gray-400'} mb-1">${escapeHtml(username)}</p>
+                <div class="chat-message ${isOwn ? 'bg-gradient-to-r from-purple-600 to-pink-600' : 'bg-gray-700'} rounded-lg px-3 sm:px-4 py-2 shadow-lg">
+                    <p class="text-xs font-medium ${isOwn ? 'text-purple-200' : 'text-gray-400'} mb-1">${escapeHtml(username)}</p>
                     <p class="text-sm text-white break-words">${escapeHtml(text)}</p>
-                    <span class="text-xs ${isOwn?'text-purple-200':'text-gray-400'} mt-1 block">${time}</span>
+                    <span class="text-xs ${isOwn ? 'text-purple-200' : 'text-gray-400'} mt-1 block">${time}</span>
                 </div>
             `;
             chatArea.appendChild(messageDiv);
-            autoScrollChat();
+            chatArea.scrollTop = chatArea.scrollHeight;
         }
 
         function displaySystemMessage(text) {
@@ -576,19 +551,18 @@
                 </div>
             `;
             chatArea.appendChild(messageDiv);
-            autoScrollChat();
+            chatArea.scrollTop = chatArea.scrollHeight;
         }
 
         window.copyCode = function() {
             const code = document.getElementById('codeDisplay').textContent;
             navigator.clipboard.writeText(code).then(() => {
-                showNotification('Success', 'Code copied! Share it with your peer.');
+                showNotification('Success', 'Connection code copied! Share it securely with your peer.');
             });
         };
 
         window.endSession = function() {
-            if (peer) peer.destroy();
-            if (conn) conn.close();
+            if (room) room.leave();
             location.reload();
         };
 
@@ -599,8 +573,7 @@
         }
 
         window.addEventListener('beforeunload', () => {
-            if (peer) peer.destroy();
-            if (conn) conn.close();
+            if (room) room.leave();
         });
     </script>
 </body>
